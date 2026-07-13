@@ -1,0 +1,13 @@
+{
+  "name": "@tracker/core",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@clickhouse/client": "^1.6.0"
+  }
+}

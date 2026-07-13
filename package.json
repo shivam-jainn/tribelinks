@@ -1,0 +1,21 @@
+{
+  "name": "modular-tracker-monorepo",
+  "version": "1.0.0",
+  "description": "Modular Short-Link, Pixel Tracking Server and SDK monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev": "npm run dev --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2",
+    "@types/node": "^20.11.0",
+    "rimraf": "^5.0.5"
+  }
+}
