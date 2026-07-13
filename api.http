@@ -1,0 +1,127 @@
+### ─── Variables ──────────────────────────────────────────────────────────────
+@baseUrl = http://localhost:3001
+@apiKey = test-api-key-123
+
+###
+# ─── URL Shortener ────────────────────────────────────────────────────────────
+###
+
+### Create a short link (auto-generated key)
+POST {{baseUrl}}/api/shorten
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "url": "http://localhost:3000/resume?cfg=eJwlyEEOgjAQQNGrTP56YjpFC85ZurFBAzFBgwgLwt1N7Or9_J0VN2XAialDufc4G8r4xinPNqHM-E7A6a5mFq0xFMMxDuWDk78hBJM_sdLINi5D7bNWL5Wkcpv62q3kInmRx2uWPNVXThw_HBQmTw"
+}
+
+###
+
+### Create a short link (custom key)
+POST {{baseUrl}}/api/shorten
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "key": "sike",
+  "url": "http://localhost:3000/resume?cfg=eJw9zrEOwjAMBNBfsTq7CBcG-hfsUQaTmjaiOJA4lP49AgTLSad7wzlCrfP8DXfAHomQOqQd0h6pRzr4_0gd9h6d2_7KB7-l9-gI3dd7j81xtSlpe06hFhnAMg9RRyhrMbkWEB2jimRYok0wp6Wd2UTDClHPmYvlGqxmAXneJEfRIMA6QLGcdIR7ZbVobPEhwNXSlS0mhROHy5hT1WHTfF77F94kSqs"
+}
+
+### 
+
+### List all short links for authenticated user
+GET {{baseUrl}}/api/shorten
+Authorization: Bearer {{apiKey}}
+
+###
+
+### Delete a short link
+DELETE {{baseUrl}}/api/shorten/mylink
+Authorization: Bearer {{apiKey}}
+
+###
+
+### Test redirection (will 302 redirect to target)
+GET {{baseUrl}}/r/resume
+
+###
+
+### Test redirection with version tag
+GET {{baseUrl}}/r/resume?v=CampaignA
+
+###
+
+### Dynamic base64 redirector
+# To generate the dest param: btoa("https://example.com") => "aHR0cHM6Ly9leGFtcGxlLmNvbQ=="
+GET {{baseUrl}}/redirect?dest=aHR0cHM6Ly9leGFtcGxlLmNvbQ==&v=email_blast&id=cta_link
+
+###
+# ─── Analytics ────────────────────────────────────────────────────────────────
+###
+
+### Get all analytics events
+GET {{baseUrl}}/api/analytics
+
+###
+
+### Filter analytics by targetId
+GET {{baseUrl}}/api/analytics?targetId=resume
+
+###
+
+### Filter analytics by targetId and version
+GET {{baseUrl}}/api/analytics?targetId=resume&version=CampaignA
+
+###
+
+### Filter analytics by type
+GET {{baseUrl}}/api/analytics?type=redirect
+
+###
+
+### Filter analytics by date range
+GET {{baseUrl}}/api/analytics?startDate=2026-01-01T00:00:00Z&endDate=2026-12-31T23:59:59Z
+
+###
+# ─── Event Ingestion ──────────────────────────────────────────────────────────
+###
+
+### Ingest a custom event (e.g. from SDK or server-side)
+POST {{baseUrl}}/api/event
+Content-Type: application/json
+
+{
+  "type": "custom",
+  "name": "button_click",
+  "targetId": "hero_cta",
+  "sessionId": "sess_abc123",
+  "url": "https://myapp.com/landing",
+  "referrer": "https://google.com",
+  "userAgent": "Mozilla/5.0 (Test)",
+  "version": "v1",
+  "metadata": {
+    "buttonLabel": "Get Started"
+  }
+}
+
+###
+# ─── Pixel Tracker ────────────────────────────────────────────────────────────
+###
+
+### Email pixel - track open (returns 1x1 GIF)
+GET {{baseUrl}}/pixel/campaign_jan2026/recipient_alice.png
+
+###
+
+### Email pixel - without extension
+GET {{baseUrl}}/pixel/campaign_jan2026?v=email_v2
+
+###
+# ─── Misc ─────────────────────────────────────────────────────────────────────
+###
+
+### Interactive demo page (open in browser instead for full experience)
+GET {{baseUrl}}/demo
+
+### SDK script (served statically)
+GET {{baseUrl}}/sdk/sdk.js
