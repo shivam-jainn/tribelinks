@@ -1,6 +1,6 @@
 # Tribelinks
 
-A modern, high‑performance link‑sharing platform built with **Fastify**, **Docker**, and **TypeScript**.
+A modern, high-performance link-management and analytics platform built with **Next.js**, **PostgreSQL**, **TypeScript**, and **TailwindCSS**.
 
 ## Table of Contents
 
@@ -16,35 +16,35 @@ A modern, high‑performance link‑sharing platform built with **Fastify**, **D
 
 ## Overview
 
-Tribelinks lets users create short, memorable links that redirect to any URL. It supports custom slugs, analytics, and an easy‑to‑use API.
+Tribelinks is an open-source URL management infrastructure that enables Modern Marketing Teams and developers to create short, memorable links with custom targeting rules, track real-time analytics, and manage campaigns.
 
 ## Features
 
-- **Fast API** powered by Fastify
-- **Docker‑first** deployment
-- **Type‑safe** codebase with TypeScript
-- **Environment‑driven** configuration (`.env` support)
-- **Extensible** architecture (MVC pattern, plugin system)
+- **Full-Stack Next.js**: Fast page loads and optimized backend route handler endpoints.
+- **Robust Authentication**: Powered by Better Auth with sign-in, signup, and API keys.
+- **Hybrid Analytics Engine**: Native support for **ClickHouse** with a high-performance **PostgreSQL fallback** (`PostgresAnalyticsStore`), ensuring data persistence without complex infrastructure.
+- **Dynamic Link Routing**: Route incoming traffic based on geo-location, device user-agent, or weight-based A/B testing.
+- **Campaigns & Outreach**: Bulk-create links linked to contacts, track leads, and see who has clicked in real time.
 
 ## Architecture & Data Models
 
-Tribelinks is designed around a structured MVC pattern on the backend (Fastify + PostgreSQL) paired with a Next.js frontend and a set of shared internal packages.
+Tribelinks utilizes a monorepo structure with a Next.js application containing all frontend interfaces and API route handlers, combined with modular packages.
 
 ### Data Models
 
-- **`User`** ([user.ts](file:///Users/shivamjain/Documents/antigravity/tribelinks/apps/server/src/models/user.ts)): Manages user credentials (PBKDF2 salted hashing), secure sessions, and API Keys for authenticated access to third-party endpoints.
-- **`Contact`** ([contact.ts](file:///Users/shivamjain/Documents/antigravity/tribelinks/apps/server/src/models/contact.ts)): Stores client profiles (name, email, notes) representing recipients or targets of tracking campaigns.
-- **`ShortLink`** ([short-link.ts](file:///Users/shivamjain/Documents/antigravity/tribelinks/apps/server/src/models/short-link.ts)): Links a unique key (custom slug) to a target destination URL, optionally associated with a specific contact.
-- **`Event`** ([event.ts](file:///Users/shivamjain/Documents/antigravity/tribelinks/apps/server/src/models/event.ts)): Stores rich analytic details of interactions (IP, user-agent, session, duration, timestamp, and custom metadata).
+- **`User`** ([user.ts](file:///Users/shivamjain/Documents/antigravity/tribelinks/apps/web/src/server/models/user.ts)): Handles authorization, secure sessions, and developer API keys.
+- **`Contact`** ([contact.ts](file:///Users/shivamjain/Documents/antigravity/tribelinks/apps/web/src/server/models/contact.ts)): Stores contacts for tracking campaign engagement.
+- **`ShortLink`** ([short-link.ts](file:///Users/shivamjain/Documents/antigravity/tribelinks/apps/web/src/server/models/short-link.ts)): Custom slug redirections with rules, campaign association, and target URLs.
+- **`Event`** ([event.ts](file:///Users/shivamjain/Documents/antigravity/tribelinks/apps/web/src/server/models/event.ts)): Analytical click/redirection metrics (IP, OS, browser, duration, and custom metadata).
 
 ### Core Functionality & Shared Packages
 
-- **Redirect Engine & Event Ingestion**: Handles incoming traffic at `/r/:key`, tracks metrics, and redirects users. Event tracking uses a decoupled architecture powered by internal packages:
-  - **`@tracker/core`**: Common schemas and type definitions for event data.
-  - **`@tracker/queue`**: In-memory event queue manager (`InMemoryQueueAdapter`) that processes event tracking asynchronously to avoid blocking the client redirect loop.
-  - **`@tracker/sdk`**: Client/Server tracker SDK for registering page view and custom tracking events.
-- **Analytics Dashboard**: High-fidelity UI detailing page views, timeframe trends, device statistics, and geological metadata.
-- **Campaign Link Tracking**: Advanced campaign-level tracking filters to trace which contacts clicked or haven't clicked a target link, styled with strike-through visualization for clicked leads.
+- **Redirect Engine & Event Ingestion**: Automatically intercepts traffic at `/r/:key`, registers events, and redirects matching targeting rules.
+  - **`@tracker/core`**: Schema definitions, filters, and standard store interfaces.
+  - **`@tracker/config`**: Unified configuration and schema validation.
+  - **`@tracker/sdk`**: Client/Server tracker SDK for custom events.
+- **Analytics Dashboard**: Clean, responsive graphics showing referrers, timeframe breakdowns, unique visitor numbers, and geo-data.
+- **Campaign Manager**: Filters and strike-through views to easily track contacts clicking campaign links.
 - **URL Shortener API**: Secure URL creation and key collision handling via programmatic API endpoints.
 
 ## Prerequisites
