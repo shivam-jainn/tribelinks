@@ -32,10 +32,18 @@ export class InMemoryAnalyticsStore implements AnalyticsStore {
       filtered = filtered.filter(e => e.version === filter.version);
     }
     if (filter.startDate) {
-      filtered = filtered.filter(e => e.timestamp >= filter.startDate!);
+      const startMs = filter.startDate.getTime();
+      filtered = filtered.filter(e => {
+        const t = e.timestamp instanceof Date ? e.timestamp : new Date(e.timestamp);
+        return t.getTime() >= startMs;
+      });
     }
     if (filter.endDate) {
-      filtered = filtered.filter(e => e.timestamp <= filter.endDate!);
+      const endMs = filter.endDate.getTime();
+      filtered = filtered.filter(e => {
+        const t = e.timestamp instanceof Date ? e.timestamp : new Date(e.timestamp);
+        return t.getTime() <= endMs;
+      });
     }
 
     const uniqueSessions = new Set(filtered.map(e => e.sessionId)).size;
