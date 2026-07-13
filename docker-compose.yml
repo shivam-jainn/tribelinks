@@ -1,0 +1,72 @@
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: tracker_clickhouse
+    ports:
+      - "${CLICKHOUSE_PORT_HTTP:-8123}:8123" # HTTP interface
+      - "${CLICKHOUSE_PORT_TCP:-9000}:9000" # Native TCP client
+    environment:
+      - CLICKHOUSE_DB=${CLICKHOUSE_DB:-tracker_analytics}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER:-default}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD:-}
+      - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: tracker_postgres
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-tracker_db}
+      - POSTGRES_USER=${POSTGRES_USER:-tracker}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-tracker_secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tracker} -d ${POSTGRES_DB:-tracker_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: tracker_server
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    environment:
+      - PORT=${PORT:-3000}
+      - CLICKHOUSE_URL=http://clickhouse:8123
+      - CLICKHOUSE_DB=${CLICKHOUSE_DB:-tracker_analytics}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER:-default}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD:-}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-tracker_db}
+      - POSTGRES_USER=${POSTGRES_USER:-tracker}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-tracker_secret}
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+      - /usr/src/app/apps/server/node_modules
+      - /usr/src/app/packages/core/node_modules
+      - /usr/src/app/packages/queue/node_modules
+      - /usr/src/app/packages/sdk/node_modules
+
+volumes:
+  clickhouse_data:
+  postgres_data:
