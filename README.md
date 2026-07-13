@@ -1,5 +1,7 @@
 # Tribelinks
 
+![tribelinks banner](assets/banner.png)
+
 A modern, high-performance link-management and analytics platform built with **Next.js**, **PostgreSQL**, **TypeScript**, and **TailwindCSS**.
 
 ## Table of Contents
