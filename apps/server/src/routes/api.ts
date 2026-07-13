@@ -1,6 +1,6 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { FastifyInstance } from "fastify";
 import { randomUUID } from "crypto";
-import { getUserByApiKey } from "../models/user";
+import { authenticate } from "./users";
 import {
   createShortLink,
   listShortLinks,
@@ -10,29 +10,6 @@ import { trackEvent } from "../models/event";
 import { getAnalyticsStore } from "../database";
 import { TrackedEvent } from "@tracker/core";
 
-/**
- * Middleware-like helper to authenticate a request via Bearer token API key.
- * Returns the user or sends a 401/403 response and returns null.
- */
-async function authenticate(request: FastifyRequest, reply: FastifyReply) {
-  const authHeader = request.headers["authorization"] ?? "";
-  const token = authHeader.startsWith("Bearer ")
-    ? authHeader.slice(7).trim()
-    : null;
-
-  if (!token) {
-    reply.status(401).send({ error: "Missing Authorization header (Bearer <api_key>)" });
-    return null;
-  }
-
-  const user = await getUserByApiKey(token);
-  if (!user) {
-    reply.status(403).send({ error: "Invalid or unknown API key" });
-    return null;
-  }
-
-  return user;
-}
 
 export async function apiRoutes(fastify: FastifyInstance) {
   /**

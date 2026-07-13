@@ -14,6 +14,7 @@ import { apiRoutes } from "./routes/api";
 import { redirectRoutes } from "./routes/redirect";
 import { pixelRoutes } from "./routes/pixel";
 import { demoRoutes } from "./routes/demo";
+import { userRoutes } from "./routes/users";
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 
@@ -34,6 +35,7 @@ fastify.register(apiRoutes);
 fastify.register(redirectRoutes);
 fastify.register(pixelRoutes);
 fastify.register(demoRoutes);
+fastify.register(userRoutes);
 
 // ─── Startup ──────────────────────────────────────────────────────────────────
 

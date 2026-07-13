@@ -4,6 +4,7 @@ export interface ShortLink {
   key: string;
   url: string;
   user_id: string;
+  contact_id: string | null;
   created_at: Date;
 }
 
@@ -24,11 +25,12 @@ export async function getShortLink(key: string): Promise<ShortLink | null> {
 export async function createShortLink(
   key: string,
   url: string,
-  userId: string
+  userId: string,
+  contactId?: string
 ): Promise<ShortLink> {
   const result = await pgPool.query<ShortLink>(
-    `INSERT INTO short_links (key, url, user_id) VALUES ($1, $2, $3) RETURNING *`,
-    [key, url, userId]
+    `INSERT INTO short_links (key, url, user_id, contact_id) VALUES ($1, $2, $3, $4) RETURNING *`,
+    [key, url, userId, contactId ?? null]
   );
   return result.rows[0];
 }
