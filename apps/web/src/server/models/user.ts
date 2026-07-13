@@ -25,14 +25,24 @@ export interface Session {
 // ─── Hash Helpers ─────────────────────────────────────────────────────────────
 function hashPassword(password: string): string {
   const salt = randomBytes(16).toString("hex");
-  const hash = pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
-  return `${hash}:${salt}`;
+  const iterations = 100000;
+  const hash = pbkdf2Sync(password, salt, iterations, 64, "sha512").toString("hex");
+  return `${hash}:${salt}:${iterations}`;
 }
 
 function verifyPassword(password: string, storedHash: string): boolean {
-  const [hash, salt] = storedHash.split(":");
-  const testHash = pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
-  return timingSafeEqual(Buffer.from(hash), Buffer.from(testHash));
+  const parts = storedHash.split(":");
+  if (parts.length === 3) {
+    const [hash, salt, iterStr] = parts;
+    const iterations = parseInt(iterStr, 10);
+    const testHash = pbkdf2Sync(password, salt, iterations, 64, "sha512").toString("hex");
+    return timingSafeEqual(Buffer.from(hash), Buffer.from(testHash));
+  } else {
+    // Legacy hash: hash:salt (1000 iterations)
+    const [hash, salt] = parts;
+    const testHash = pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
+    return timingSafeEqual(Buffer.from(hash), Buffer.from(testHash));
+  }
 }
 
 // ─── User Ops ─────────────────────────────────────────────────────────────────
@@ -97,9 +107,10 @@ export async function listApiKeys(userId: string): Promise<ApiKey[]> {
 export async function createSession(userId: string): Promise<string> {
   const token = `sess_${Date.now()}_${randomBytes(16).toString("hex")}`;
   const expiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days
+  const sessionId = randomBytes(16).toString("hex");
   await pgPool.query(
-    `INSERT INTO sessions (token, user_id, expires_at) VALUES ($1, $2, $3)`,
-    [token, userId, expiresAt]
+    `INSERT INTO sessions (id, token, user_id, expires_at, created_at, updated_at) VALUES ($1, $2, $3, $4, NOW(), NOW())`,
+    [sessionId, token, userId, expiresAt]
   );
   return token;
 }
@@ -118,4 +129,3 @@ export async function getUserBySessionToken(token: string): Promise<User | null>
 export async function deleteSessionToken(token: string): Promise<void> {
   await pgPool.query(`DELETE FROM sessions WHERE token = $1`, [token]);
 }
-

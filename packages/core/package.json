@@ -5,7 +5,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rimraf dist && tsc",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "test": "bun test"
   },
   "dependencies": {
     "@clickhouse/client": "^1.6.0"

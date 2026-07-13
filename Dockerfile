@@ -6,7 +6,8 @@ COPY package.json package-lock.json* tsconfig.json ./
 COPY packages/queue/package.json ./packages/queue/
 COPY packages/core/package.json ./packages/core/
 COPY packages/sdk/package.json ./packages/sdk/
-COPY apps/server/package.json ./apps/server/
+COPY packages/config/package.json ./packages/config/
+COPY apps/web/package.json ./apps/web/
 
 # 2. Dependencies stage (installs all dependencies including dev)
 FROM base AS dependencies
@@ -27,7 +28,7 @@ FROM dependencies AS development
 COPY packages ./packages
 COPY apps ./apps
 EXPOSE 3000
-CMD ["npm", "run", "dev", "--workspace=apps/server"]
+CMD ["npm", "run", "dev", "--workspace=apps/web"]
 
 # 6. Production runner stage (keeps the final image tiny)
 FROM node:20-alpine AS production
@@ -38,11 +39,12 @@ ENV NODE_ENV=production
 COPY --from=build /usr/src/app/package.json ./
 COPY --from=build /usr/src/app/tsconfig.json ./
 COPY --from=build /usr/src/app/packages ./packages
-COPY --from=build /usr/src/app/apps/server/dist ./apps/server/dist
-COPY --from=build /usr/src/app/apps/server/package.json ./apps/server/
+COPY --from=build /usr/src/app/apps/web/.next ./apps/web/.next
+COPY --from=build /usr/src/app/apps/web/public ./apps/web/public
+COPY --from=build /usr/src/app/apps/web/package.json ./apps/web/
 
 # Copy only production dependencies
 COPY --from=prod-dependencies /usr/src/app/node_modules ./node_modules
 
 EXPOSE 3000
-CMD ["npm", "run", "start", "--workspace=apps/server"]
+CMD ["npm", "run", "start", "--workspace=apps/web"]

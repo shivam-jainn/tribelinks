@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { Key, Plus, Trash2, Eye, EyeOff, Copy, Check, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { authClient } from "../../../lib/auth-client";
+import { config } from "@tracker/config";
 
 // ─── Masked key display ───────────────────────────────────────────────────────
 function MaskedKey({ value }: { value: string }) {
@@ -46,7 +48,7 @@ function MaskedKey({ value }: { value: string }) {
 export default function SettingsPage() {
   const router = useRouter();
   const [keys, setKeys] = useState<ApiKey[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [newLabel, setNewLabel] = useState("");
   const [generating, setGenerating] = useState(false);
 
@@ -89,9 +91,12 @@ export default function SettingsPage() {
   }
 
   async function handleLogout() {
-    await fetch("/api/auth/login", { method: "DELETE" });
+    await authClient.signOut();
     router.push("/auth/login");
+    router.refresh();
   }
+
+  const isEnabled = config.public.enableApiKeys;
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
@@ -103,128 +108,143 @@ export default function SettingsPage() {
             Generate API keys for use with the SDK, CLI, or any external integration.
           </p>
         </div>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/8 text-white/40 hover:text-white/70 text-sm transition-all"
-        >
-          <LogOut className="w-3.5 h-3.5" />
-          Sign out
-        </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6 max-w-2xl">
+      <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6 max-w-5xl">
 
         {/* ── API Keys section ────────────────────────────────────────────── */}
-        <div className="glass rounded-2xl border border-white/[0.06] overflow-hidden">
-          <div className="px-6 py-5 border-b border-white/[0.06]">
-            <h2 className="text-sm font-semibold text-white">API Keys</h2>
-            <p className="text-xs text-white/40 mt-1">
-              Use these keys to authenticate SDK calls, server-side integrations, and the{" "}
-              <code className="text-violet-300 font-mono">Authorization: Bearer &lt;key&gt;</code> header.
-              Each key can be independently labelled and revoked.
-            </p>
-          </div>
+        <div className="relative">
+          <div className={`glass rounded-2xl border border-white/[0.06] overflow-hidden transition-all ${!isEnabled ? "blur-[3px] select-none pointer-events-none opacity-60" : ""}`}>
+            <div className="px-6 py-5 border-b border-white/[0.06]">
+              <h2 className="text-sm font-semibold text-white">API Keys</h2>
+              <p className="text-xs text-white/40 mt-1">
+                Use these keys to authenticate SDK calls, server-side integrations, and the{" "}
+                <code className="text-violet-300 font-mono">Authorization: Bearer &lt;key&gt;</code> header.
+                Each key can be independently labelled and revoked.
+              </p>
+            </div>
 
-          {/* Generate form */}
-          <div className="px-6 py-4 border-b border-white/[0.06]">
-            <form onSubmit={handleGenerate} className="flex gap-3">
-              <input
-                value={newLabel}
-                onChange={(e) => setNewLabel(e.target.value)}
-                placeholder="Label — e.g. Production SDK, CI/CD"
-                className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/8 text-white placeholder-white/20 text-sm focus:outline-none focus:border-violet-500/50 transition-all"
-              />
-              <button
-                type="submit"
-                disabled={generating}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/8 hover:bg-white/14 border border-white/8 text-white/70 hover:text-white text-sm transition-all disabled:opacity-40 shrink-0"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                {generating ? "Generating…" : "Generate key"}
-              </button>
-            </form>
-          </div>
-
-          {/* Keys list */}
-          <div className="divide-y divide-white/[0.04]">
-            {loading ? (
-              <div className="py-10 text-center text-white/20 text-sm">Loading…</div>
-            ) : keys.length === 0 ? (
-              <div className="py-12 text-center space-y-2">
-                <Key className="w-5 h-5 text-white/10 mx-auto" />
-                <p className="text-white/20 text-sm">No API keys yet. Generate one above.</p>
-              </div>
-            ) : (
-              keys.map((k) => (
-                <div
-                  key={k.key}
-                  className="px-6 py-4 flex items-center gap-4 hover:bg-white/[0.015] transition-colors"
+            {/* Generate form */}
+            <div className="px-6 py-4 border-b border-white/[0.06]">
+              <form onSubmit={handleGenerate} className="flex gap-3">
+                <input
+                  value={newLabel}
+                  onChange={(e) => setNewLabel(e.target.value)}
+                  placeholder="Label — e.g. Production SDK, CI/CD"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/8 text-white placeholder-white/20 text-sm focus:outline-none focus:border-violet-500/50 transition-all"
+                  disabled={!isEnabled}
+                />
+                <button
+                  type="submit"
+                  disabled={generating || !isEnabled}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/8 hover:bg-white/14 border border-white/8 text-white/70 hover:text-white text-sm transition-all disabled:opacity-40 shrink-0"
                 >
-                  <Key className="w-4 h-4 text-white/20 shrink-0" />
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-white/70">
-                        {k.label || <span className="italic text-white/30">Unlabelled</span>}
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] border-emerald-500/30 bg-emerald-500/5 text-emerald-400"
-                      >
-                        active
-                      </Badge>
-                    </div>
-                    <MaskedKey value={k.key} />
-                  </div>
-                  <div className="text-xs text-white/25 shrink-0">
-                    {new Date(k.createdAt).toLocaleDateString("en", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </div>
-                  <button
-                    onClick={() => handleRevoke(k.key)}
-                    className="p-1.5 rounded-lg hover:bg-red-500/10 text-white/20 hover:text-red-400 transition-all shrink-0"
-                    title="Revoke key"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  <Plus className="w-3.5 h-3.5" />
+                  {generating ? "Generating…" : "Generate key"}
+                </button>
+              </form>
+            </div>
+
+            {/* Keys list */}
+            <div className="divide-y divide-white/[0.04]">
+              {loading ? (
+                <div className="py-10 text-center text-white/20 text-sm">Loading…</div>
+              ) : keys.length === 0 ? (
+                <div className="py-12 text-center space-y-2">
+                  <Key className="w-5 h-5 text-white/10 mx-auto" />
+                  <p className="text-white/20 text-sm">No API keys yet. Generate one above.</p>
                 </div>
-              ))
-            )}
+              ) : (
+                keys.map((k) => (
+                  <div
+                    key={k.key}
+                    className="px-6 py-4 flex items-center gap-4 hover:bg-white/[0.015] transition-colors"
+                  >
+                    <Key className="w-4 h-4 text-white/20 shrink-0" />
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-white/70">
+                          {k.label || <span className="italic text-white/30">Unlabelled</span>}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] border-emerald-500/30 bg-emerald-500/5 text-emerald-400"
+                        >
+                          active
+                        </Badge>
+                      </div>
+                      <MaskedKey value={k.key} />
+                    </div>
+                    <div className="text-xs text-white/25 shrink-0">
+                      {new Date(k.createdAt).toLocaleDateString("en", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </div>
+                    <button
+                      onClick={() => handleRevoke(k.key)}
+                      className="p-1.5 rounded-lg hover:bg-red-500/10 text-white/20 hover:text-red-400 transition-all shrink-0"
+                      title="Revoke key"
+                      disabled={!isEnabled}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
+          {!isEnabled && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/10 rounded-2xl">
+              <span className="px-4 py-2 rounded-full bg-violet-500/20 border border-violet-500/30 text-xs font-semibold text-violet-300 uppercase tracking-widest animate-pulse shadow-lg shadow-violet-500/5">
+                Coming Soon
+              </span>
+              <p className="text-white/40 text-xs mt-2 font-medium">API Keys & External Integrations feature is coming soon</p>
+            </div>
+          )}
         </div>
 
         {/* ── SDK Quick Start ──────────────────────────────────────────────── */}
-        <div className="glass rounded-2xl p-6 border border-white/[0.06] space-y-4">
-          <h2 className="text-sm font-semibold text-white">SDK Quick Start</h2>
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <p className="text-xs text-white/30 uppercase tracking-wider">Install</p>
-              <code className="block px-4 py-3 rounded-xl bg-black/40 border border-white/6 text-emerald-300 text-xs font-mono">
-                npm install @tracker/sdk
-              </code>
-            </div>
-            <div className="space-y-1.5">
-              <p className="text-xs text-white/30 uppercase tracking-wider">Initialize</p>
-              <pre className="px-4 py-3 rounded-xl bg-black/40 border border-white/6 text-cyan-300 text-xs font-mono overflow-x-auto whitespace-pre">{`import { TribelinksSDK } from '@tracker/sdk';
+        <div className="relative">
+          <div className={`glass rounded-2xl p-6 border border-white/[0.06] space-y-4 transition-all ${!isEnabled ? "blur-[3px] select-none pointer-events-none opacity-60" : ""}`}>
+            <h2 className="text-sm font-semibold text-white">SDK Quick Start</h2>
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <p className="text-xs text-white/30 uppercase tracking-wider">Install</p>
+                <code className="block px-4 py-3 rounded-xl bg-black/40 border border-white/6 text-emerald-300 text-xs font-mono">
+                  npm install @tracker/sdk
+                </code>
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-xs text-white/30 uppercase tracking-wider">Initialize</p>
+                <pre className="px-4 py-3 rounded-xl bg-black/40 border border-white/6 text-cyan-300 text-xs font-mono overflow-x-auto whitespace-pre">{`import { TribelinksSDK } from '@tracker/sdk';
 
 const sdk = new TribelinksSDK({
   apiKey: 'YOUR_API_KEY',  // from Settings → API Keys
-  baseUrl: '${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}',
+  baseUrl: '${config.public.apiUrl}',
 });
 
 // Track a custom event
 sdk.track({ type: 'pageview', targetId: 'my-campaign' });`}</pre>
-            </div>
-            <div className="space-y-1.5">
-              <p className="text-xs text-white/30 uppercase tracking-wider">Direct API call</p>
-              <pre className="px-4 py-3 rounded-xl bg-black/40 border border-white/6 text-violet-300 text-xs font-mono overflow-x-auto whitespace-pre">{`curl -X POST ${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/event \\
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-xs text-white/30 uppercase tracking-wider">Direct API call</p>
+                <pre className="px-4 py-3 rounded-xl bg-black/40 border border-white/6 text-violet-300 text-xs font-mono overflow-x-auto whitespace-pre">{`curl -X POST ${config.public.apiUrl}/api/event \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{ "type": "click", "targetId": "hero-cta" }'`}</pre>
+              </div>
             </div>
           </div>
+          {!isEnabled && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/10 rounded-2xl">
+              <span className="px-4 py-2 rounded-full bg-cyan-500/20 border border-cyan-500/30 text-xs font-semibold text-cyan-300 uppercase tracking-widest animate-pulse shadow-lg shadow-cyan-500/5">
+                Coming Soon
+              </span>
+              <p className="text-white/40 text-xs mt-2 font-medium">Developer SDK & CLI are coming soon</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

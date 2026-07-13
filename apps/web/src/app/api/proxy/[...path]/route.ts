@@ -1,44 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 /**
  * Generic proxy handler: /api/proxy/[...path]
- * Reads the httpOnly session cookie server-side, adds it as Authorization
- * header, and forwards the request to the Fastify backend.
+ * Forwards requests to the local Next.js API endpoints.
  */
 async function handler(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
-  const cookieStore = await cookies();
-  const session = cookieStore.get("tribelinks_session");
-
   const { path } = await params;
-  const backendPath = "/" + path.join("/");
-
-  // Forward query string
   const url = new URL(req.url);
-  const backendUrl = `${API_URL}${backendPath}${url.search}`;
+  
+  // Forward to our local Next.js api routes
+  const localUrl = `${url.origin}/api/${path.join("/")}${url.search}`;
 
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-  if (session?.value) {
-    headers["Authorization"] = `Bearer ${session.value}`;
-  }
+  const headers = new Headers();
+  req.headers.forEach((value, name) => {
+    headers.set(name, value);
+  });
 
   let body: string | undefined;
   if (req.method !== "GET" && req.method !== "HEAD") {
     body = await req.text().catch(() => undefined);
   }
 
-  const res = await fetch(backendUrl, {
+  const res = await fetch(localUrl, {
     method: req.method,
     headers,
     body,
-  }).catch(() => null);
+    cache: "no-store",
+  }).catch((err) => {
+    console.error("Local API proxy failed:", err);
+    return null;
+  });
 
   if (!res) {
-    return NextResponse.json({ error: "Backend unreachable" }, { status: 502 });
+    return NextResponse.json({ error: "Local API unreachable" }, { status: 502 });
   }
 
   const data = await res.text();

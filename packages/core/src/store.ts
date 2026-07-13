@@ -28,6 +28,9 @@ export class InMemoryAnalyticsStore implements AnalyticsStore {
     if (filter.targetId) {
       filtered = filtered.filter(e => e.targetId === filter.targetId);
     }
+    if (filter.targetIds && filter.targetIds.length > 0) {
+      filtered = filtered.filter(e => filter.targetIds!.includes(e.targetId));
+    }
     if (filter.version) {
       filtered = filtered.filter(e => e.version === filter.version);
     }
@@ -142,17 +145,21 @@ export class ClickHouseAnalyticsStore implements AnalyticsStore {
       conditions.push("targetId = {targetId: String}");
       params.targetId = filter.targetId;
     }
+    if (filter.targetIds && filter.targetIds.length > 0) {
+      conditions.push("targetId IN {targetIds: Array(String)}");
+      params.targetIds = filter.targetIds;
+    }
     if (filter.version) {
       conditions.push("version = {version: String}");
       params.version = filter.version;
     }
     if (filter.startDate) {
       conditions.push("timestamp >= {startDate: DateTime64(3)}");
-      params.startDate = filter.startDate.toISOString();
+      params.startDate = filter.startDate.toISOString().replace("Z", "").replace("T", " ");
     }
     if (filter.endDate) {
       conditions.push("timestamp <= {endDate: DateTime64(3)}");
-      params.endDate = filter.endDate.toISOString();
+      params.endDate = filter.endDate.toISOString().replace("Z", "").replace("T", " ");
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";

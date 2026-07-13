@@ -21,7 +21,9 @@ import {
   Info,
   Clock,
   Zap,
-  RotateCw
+  RotateCw,
+  Check,
+  X
 } from "lucide-react";
 import {
   AreaChart,
@@ -160,6 +162,18 @@ export default function DashboardPage() {
   const [timeframe, setTimeframe] = useState<"24h" | "7d" | "30d" | "all">("7d");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [lastActionResult, setLastActionResult] = useState<{
+    type: "shorten" | "bulk" | "contact" | "apikey" | "analytics" | "reset_analytics";
+    data: any;
+  } | null>(null);
+  const [copiedText, setCopiedText] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedText(text);
+    toast.success("Copied to clipboard!");
+    setTimeout(() => setCopiedText(null), 2000);
+  };
 
   // Compute startDate based on timeframe
   const computedFilters = useMemo(() => {
@@ -318,11 +332,13 @@ export default function DashboardPage() {
 
   // ── Action composer handler ────────────────────────────────────────────────
   async function handleExecute(action: ActionConfig, values: Record<string, string>) {
+    setLastActionResult(null); // Clear previous result
     if (action.id === "shorten") {
       if (!values.url) { toast.error("URL is required"); return; }
       try {
-        await createLink(values.url, values.key || undefined);
+        const res = await createLink(values.url, values.key || undefined);
         toast.success("Short link created!");
+        setLastActionResult({ type: "shorten", data: res });
         load();
       } catch (e: any) { toast.error(e.message); }
     }
@@ -337,6 +353,7 @@ export default function DashboardPage() {
       try {
         const res = await createBulkLinks(values.url, persons);
         toast.success(`Created ${res.created} tracking links!`);
+        setLastActionResult({ type: "bulk", data: res });
         load();
       } catch (e: any) { toast.error(e.message); }
     }
@@ -344,8 +361,9 @@ export default function DashboardPage() {
     if (action.id === "contact") {
       if (!values.name) { toast.error("Contact name is required"); return; }
       try {
-        await createContact(values.name, values.email || undefined, values.notes || undefined);
+        const res = await createContact(values.name, values.email || undefined, values.notes || undefined);
         toast.success("Contact created successfully!");
+        setLastActionResult({ type: "contact", data: res });
       } catch (e: any) { toast.error(e.message); }
     }
 
@@ -353,6 +371,7 @@ export default function DashboardPage() {
       try {
         const key = await createApiKey(values.label || undefined);
         toast.success(`API Key created: ${key.key}`);
+        setLastActionResult({ type: "apikey", data: key });
       } catch (e: any) { toast.error(e.message); }
     }
 
@@ -419,6 +438,167 @@ export default function DashboardPage() {
           executeLabel="Run Command"
           cancelLabel="Discard"
         />
+
+        {/* Action Result Card */}
+        {lastActionResult && (
+          <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-zinc-900/80 backdrop-blur-md p-5 mt-4 transition-all animate-in fade-in slide-in-from-top-2 duration-300">
+            {/* Left accent bar */}
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-violet-500 to-indigo-500" />
+            
+            <div className="flex items-start justify-between gap-4 pl-2">
+              <div className="flex-1 min-w-0">
+                {/* shorten result */}
+                {lastActionResult.type === "shorten" && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <h3 className="text-sm font-bold text-white tracking-wide">Short Link Created Successfully</h3>
+                    </div>
+                    <div className="flex items-center gap-3 bg-black/40 border border-white/[0.04] p-3 rounded-xl">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-zinc-500 font-semibold mb-0.5">SHORT URL</p>
+                        <a 
+                          href={lastActionResult.data.shortUrl} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="text-sm font-bold text-violet-400 hover:text-violet-300 transition-colors break-all flex items-center gap-1.5"
+                        >
+                          {lastActionResult.data.shortUrl}
+                          <ExternalLink className="w-3.5 h-3.5 inline-block shrink-0" />
+                        </a>
+                        <p className="text-[10px] text-zinc-600 mt-1 truncate">Destination: {lastActionResult.data.url}</p>
+                      </div>
+                      <button
+                        onClick={() => copyToClipboard(lastActionResult.data.shortUrl)}
+                        className="p-2.5 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] text-zinc-300 hover:text-white rounded-xl transition-all shrink-0 active:scale-95"
+                        title="Copy Short URL"
+                      >
+                        {copiedText === lastActionResult.data.shortUrl ? (
+                          <Check className="w-4 h-4 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* apikey result */}
+                {lastActionResult.type === "apikey" && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                      <h3 className="text-sm font-bold text-white tracking-wide">API Key Generated</h3>
+                    </div>
+                    <p className="text-xs text-amber-300/80 font-medium">
+                      Make sure to copy this API key now. For security reasons, you won't be able to see it again.
+                    </p>
+                    <div className="flex items-center gap-3 bg-amber-950/20 border border-amber-500/20 p-3 rounded-xl">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-amber-500/70 font-semibold mb-0.5">API KEY</p>
+                        <code className="text-sm font-mono font-bold text-white break-all">{lastActionResult.data.key}</code>
+                        {lastActionResult.data.label && (
+                          <p className="text-[10px] text-zinc-500 mt-1">Label: {lastActionResult.data.label}</p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => copyToClipboard(lastActionResult.data.key)}
+                        className="p-2.5 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] text-zinc-300 hover:text-white rounded-xl transition-all shrink-0 active:scale-95"
+                        title="Copy API Key"
+                      >
+                        {copiedText === lastActionResult.data.key ? (
+                          <Check className="w-4 h-4 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* contact result */}
+                {lastActionResult.type === "contact" && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                      <h3 className="text-sm font-bold text-white tracking-wide">Contact Added Successfully</h3>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-black/40 border border-white/[0.04] p-3.5 rounded-xl text-xs">
+                      <div>
+                        <span className="text-zinc-500 font-semibold uppercase text-[10px]">NAME</span>
+                        <p className="font-bold text-white mt-0.5">{lastActionResult.data.name}</p>
+                      </div>
+                      {lastActionResult.data.email && (
+                        <div>
+                          <span className="text-zinc-500 font-semibold uppercase text-[10px]">EMAIL</span>
+                          <p className="font-bold text-white mt-0.5">{lastActionResult.data.email}</p>
+                        </div>
+                      )}
+                      {lastActionResult.data.notes && (
+                        <div className="sm:col-span-3 border-t border-white/[0.04] pt-2 mt-1">
+                          <span className="text-zinc-500 font-semibold uppercase text-[10px]">NOTES</span>
+                          <p className="text-zinc-300 mt-0.5 italic">{lastActionResult.data.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* bulk result */}
+                {lastActionResult.type === "bulk" && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-2 w-2 rounded-full bg-violet-500 animate-pulse" />
+                        <h3 className="text-sm font-bold text-white tracking-wide">
+                          Bulk Tracking Links Generated ({lastActionResult.data.created})
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const allLinks = lastActionResult.data.links.map((l: any) => `${l.name}: ${l.shortUrl}`).join("\n");
+                          copyToClipboard(allLinks);
+                        }}
+                        className="text-xs bg-violet-600/10 hover:bg-violet-600/20 text-violet-300 border border-violet-500/20 px-2.5 py-1.5 rounded-lg transition-all active:scale-95 font-semibold shrink-0"
+                      >
+                        Copy All Links
+                      </button>
+                    </div>
+                    <div className="max-h-40 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+                      {lastActionResult.data.links.map((link: any, index: number) => (
+                        <div key={index} className="flex items-center justify-between gap-3 bg-black/40 border border-white/[0.04] px-3 py-2 rounded-xl text-xs">
+                          <div className="min-w-0 flex-1">
+                            <span className="font-bold text-zinc-300">{link.name}</span>
+                            {link.email && <span className="text-zinc-500 font-medium ml-1.5">({link.email})</span>}
+                            <div className="text-[10px] text-violet-400 font-medium truncate mt-0.5">{link.shortUrl}</div>
+                          </div>
+                          <button
+                            onClick={() => copyToClipboard(link.shortUrl)}
+                            className="p-1.5 hover:bg-white/[0.04] text-zinc-400 hover:text-white rounded-lg transition-colors shrink-0"
+                          >
+                            {copiedText === link.shortUrl ? (
+                              <Check className="w-3.5 h-3.5 text-emerald-400" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={() => setLastActionResult(null)}
+                className="p-1 text-zinc-500 hover:text-white rounded-lg hover:bg-white/[0.04] transition-colors shrink-0 active:scale-95"
+                title="Dismiss"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Scrollable Dashboard Content ────────────────────────────────── */}

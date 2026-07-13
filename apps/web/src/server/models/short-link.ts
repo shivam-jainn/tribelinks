@@ -5,6 +5,9 @@ export interface ShortLink {
   url: string;
   user_id: string;
   contact_id: string | null;
+  campaign_id: string | null;
+  rules: any | null;
+  type: string;
   created_at: Date;
 }
 
@@ -26,11 +29,14 @@ export async function createShortLink(
   key: string,
   url: string,
   userId: string,
-  contactId?: string
+  contactId?: string,
+  campaignId?: string,
+  rules?: any,
+  type?: string
 ): Promise<ShortLink> {
   const result = await pgPool.query<ShortLink>(
-    `INSERT INTO short_links (key, url, user_id, contact_id) VALUES ($1, $2, $3, $4) RETURNING *`,
-    [key, url, userId, contactId ?? null]
+    `INSERT INTO short_links (key, url, user_id, contact_id, campaign_id, rules, type) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [key, url, userId, contactId ?? null, campaignId ?? null, rules ? JSON.stringify(rules) : null, type ?? 'short']
   );
   return result.rows[0];
 }
@@ -58,4 +64,26 @@ export async function deleteShortLink(
     [key, userId]
   );
   return (result.rowCount ?? 0) > 0;
+}
+
+/**
+ * Update a short link's URL, contact, campaign, or rules.
+ */
+export async function updateShortLink(
+  key: string,
+  userId: string,
+  updates: { url?: string; contactId?: string | null; campaignId?: string | null; rules?: any; type?: string }
+): Promise<ShortLink | null> {
+  const result = await pgPool.query<ShortLink>(
+    `UPDATE short_links 
+     SET url = COALESCE($1, url), 
+         contact_id = $2, 
+         campaign_id = $3, 
+         rules = $4,
+         type = COALESCE($5, type) 
+     WHERE key = $6 AND user_id = $7 
+     RETURNING *`,
+    [updates.url ?? null, updates.contactId ?? null, updates.campaignId ?? null, updates.rules ? JSON.stringify(updates.rules) : null, updates.type ?? null, key, userId]
+  );
+  return result.rows[0] ?? null;
 }

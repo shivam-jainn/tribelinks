@@ -17,6 +17,7 @@ export interface TrackedEvent {
 export interface AnalyticsFilter {
   type?: string;
   targetId?: string;
+  targetIds?: string[];
   version?: string;
   startDate?: Date;
   endDate?: Date;

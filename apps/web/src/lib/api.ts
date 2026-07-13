@@ -1,14 +1,11 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+import { config } from "@tracker/config";
 
-// The session cookie (tribelinks_session) is httpOnly — set by the Next.js
-// /api/auth/login route handler. The browser sends it automatically on all
-// same-origin requests. For cross-origin calls to the Fastify backend, we
-// use a server-side proxy (or pass credentials via the Next.js route handler).
-// This client is the direct-to-backend version used from the browser.
+const API_URL = config.public.apiUrl;
 
-async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  // We need to pass the session key to the backend. Since the cookie is httpOnly
-  // we can't read it client-side — instead we hit our own Next.js proxy.
+async function apiFetch<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
   const res = await fetch(`/api/proxy${path}`, {
     ...options,
     credentials: "include",
@@ -34,6 +31,8 @@ export interface ShortLink {
   shortUrl: string;
   createdAt: string;
   contact_id?: string | null;
+  rules?: any | null;
+  type?: string;
 }
 
 export interface ApiKey {
@@ -96,13 +95,10 @@ export interface BulkLinkResult {
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 export async function signup(name: string, email: string, password?: string) {
-  return apiFetch<{ user: UserProfile; sessionToken: string }>(
-    "/api/signup",
-    {
-      method: "POST",
-      body: JSON.stringify({ name, email, password }),
-    }
-  );
+  return apiFetch<{ user: UserProfile; sessionToken: string }>("/api/signup", {
+    method: "POST",
+    body: JSON.stringify({ name, email, password }),
+  });
 }
 
 export async function getMe(): Promise<UserProfile> {
@@ -115,10 +111,17 @@ export async function listLinks(): Promise<ShortLink[]> {
   return apiFetch<ShortLink[]>("/api/shorten");
 }
 
-export async function createLink(url: string, key?: string): Promise<ShortLink> {
+export async function createLink(
+  url: string,
+  key?: string,
+  contactId?: string,
+  campaignId?: string,
+  rules?: any,
+  type?: string,
+): Promise<ShortLink> {
   return apiFetch<ShortLink>("/api/shorten", {
     method: "POST",
-    body: JSON.stringify({ url, key }),
+    body: JSON.stringify({ url, key, contactId, campaignId, rules, type }),
   });
 }
 
@@ -129,7 +132,7 @@ export async function deleteLink(key: string): Promise<void> {
 export async function createBulkLinks(
   url: string,
   persons: Array<{ name: string; email?: string }>,
-  keyPrefix?: string
+  keyPrefix?: string,
 ): Promise<BulkLinkResult> {
   return apiFetch<BulkLinkResult>("/api/shorten/bulk", {
     method: "POST",
@@ -163,7 +166,7 @@ export async function listContacts(): Promise<Contact[]> {
 export async function createContact(
   name: string,
   email?: string,
-  notes?: string
+  notes?: string,
 ): Promise<Contact> {
   return apiFetch<Contact>("/api/contacts", {
     method: "POST",
@@ -192,4 +195,79 @@ export async function getAnalytics(filters?: {
   if (filters?.endDate) params.set("endDate", filters.endDate);
   const qs = params.toString();
   return apiFetch<AnalyticsReport>(`/api/analytics${qs ? `?${qs}` : ""}`);
+}
+
+// ─── Campaigns ───────────────────────────────────────────────────────────────
+
+export interface Campaign {
+  id: string;
+  name: string;
+  description: string | null;
+  type: string;
+  status: string;
+  created_at: string;
+  contact_count?: number;
+  clicked_count?: number;
+}
+
+export interface CampaignContact {
+  campaign_contact_id: string;
+  tracking_status: string;
+  associated_at: string;
+  global_contact_id: string | null;
+  name: string;
+  email: string | null;
+  notes: string | null;
+}
+
+export interface CampaignDetails extends Campaign {
+  contacts: CampaignContact[];
+  links: ShortLink[];
+}
+
+export async function listCampaigns(): Promise<Campaign[]> {
+  return apiFetch<Campaign[]>("/api/campaigns");
+}
+
+export async function createCampaign(
+  name: string,
+  description?: string,
+  type?: string,
+): Promise<Campaign> {
+  return apiFetch<Campaign>("/api/campaigns", {
+    method: "POST",
+    body: JSON.stringify({ name, description, type }),
+  });
+}
+
+export async function getCampaign(id: string): Promise<CampaignDetails> {
+  return apiFetch<CampaignDetails>(`/api/campaigns/${id}`);
+}
+
+export async function addContactToCampaign(
+  id: string,
+  contactData: {
+    contactId?: string;
+    name?: string;
+    email?: string;
+    notes?: string;
+  },
+): Promise<any> {
+  return apiFetch<any>(`/api/campaigns/${id}/contacts`, {
+    method: "POST",
+    body: JSON.stringify(contactData),
+  });
+}
+
+export async function removeContactFromCampaign(
+  id: string,
+  campaignContactId: string,
+): Promise<void> {
+  await apiFetch<void>(`/api/campaigns/${id}/contacts/${campaignContactId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function deleteCampaign(id: string): Promise<void> {
+  await apiFetch<void>(`/api/campaigns/${id}`, { method: "DELETE" });
 }

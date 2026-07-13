@@ -11,19 +11,16 @@ let queueStarted = false;
 /**
  * Start processing queued events. Should be called once on startup.
  */
-export function startEventQueue(logger: { info: Function; error: Function }): void {
+export function startEventQueue(logger: { info: Function; error: Function } = console): void {
   if (queueStarted) return;
   queueStarted = true;
 
   eventQueue.process(async (event) => {
     try {
       await getAnalyticsStore().saveEvent(event);
-      logger.info(
-        { eventId: event.id, type: event.type },
-        "Saved event to analytics store"
-      );
+      logger.info(`[Queue] Saved event to analytics store: ${event.id} (${event.type})`);
     } catch (err) {
-      logger.error(err, "Queue processing error saving event to store");
+      logger.error(`[Queue] Queue processing error saving event to store:`, err);
     }
   });
 }

@@ -40,11 +40,11 @@ services:
       context: .
       dockerfile: Dockerfile
       target: development
-    container_name: tracker_server
+    container_name: tracker_web
     ports:
-      - "${PORT:-3000}:${PORT:-3000}"
+      - "3000:3000"
     environment:
-      - PORT=${PORT:-3000}
+      - PORT=3000
       - CLICKHOUSE_URL=http://clickhouse:8123
       - CLICKHOUSE_DB=${CLICKHOUSE_DB:-tracker_analytics}
       - CLICKHOUSE_USER=${CLICKHOUSE_USER:-default}
@@ -62,10 +62,11 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-      - /usr/src/app/apps/server/node_modules
+      - /usr/src/app/apps/web/node_modules
       - /usr/src/app/packages/core/node_modules
       - /usr/src/app/packages/queue/node_modules
       - /usr/src/app/packages/sdk/node_modules
+      - /usr/src/app/packages/config/node_modules
 
 volumes:
   clickhouse_data:

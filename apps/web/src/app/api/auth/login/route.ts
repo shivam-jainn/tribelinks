@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { config } from "@tracker/config";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = config.server.baseUrl;
 
 /**
  * POST /api/auth/login
