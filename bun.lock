@@ -4,12 +4,10 @@
   "workspaces": {
     "": {
       "name": "modular-tracker-monorepo",
-      "dependencies": {
-        "tsx": "^4.23.1",
-      },
       "devDependencies": {
         "@types/node": "^20.11.0",
         "rimraf": "^5.0.5",
+        "tsx": "^4.23.1",
         "typescript": "^5.3.3",
       },
     },
@@ -51,6 +49,7 @@
         "eslint": "^9",
         "eslint-config-next": "16.2.10",
         "tailwindcss": "^4",
+        "tsx": "^4.23.1",
         "typescript": "^5",
       },
     },
