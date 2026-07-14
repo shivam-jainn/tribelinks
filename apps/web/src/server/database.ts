@@ -385,17 +385,18 @@ export function getAnalyticsStore(): AnalyticsStore {
 }
 
 export async function initAnalyticsStore(): Promise<void> {
+  const analyticsDb = config.analytics.db;
   const chConfig = config.clickhouse;
-  const clickhouseUrl = chConfig.url;
-  if (clickhouseUrl) {
+  
+  if (analyticsDb === "postgres") {
+    _store = new PostgresAnalyticsStore(pgPool);
+  } else {
     _store = new ClickHouseAnalyticsStore({
-      url: clickhouseUrl,
+      url: chConfig.url,
       username: chConfig.user,
       password: chConfig.password,
       database: chConfig.db,
     });
-  } else {
-    _store = new PostgresAnalyticsStore(pgPool);
   }
   await _store.initialize();
 }

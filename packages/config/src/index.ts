@@ -59,6 +59,9 @@ const getBool = (val: string | undefined, def: boolean): boolean => {
 };
 
 export const config = {
+  analytics: {
+    db: process.env.ANALYTICS_DB || "clickhouse",
+  },
   postgres: {
     connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
     host: process.env.POSTGRES_HOST || "localhost",
@@ -68,7 +71,11 @@ export const config = {
     password: process.env.POSTGRES_PASSWORD || "tracker_secret",
   },
   clickhouse: {
-    url: process.env.CLICKHOUSE_URL || "http://localhost:8123",
+    host: process.env.CLICKHOUSE_HOST || "localhost",
+    port: process.env.CLICKHOUSE_PORT || process.env.CLICKHOUSE_PORT_HTTP || "8123",
+    get url(): string {
+      return process.env.CLICKHOUSE_URL || `http://${this.host}:${this.port}`;
+    },
     db: process.env.CLICKHOUSE_DB || "tracker_analytics",
     user: process.env.CLICKHOUSE_USER || "default",
     password: process.env.CLICKHOUSE_PASSWORD || "",
