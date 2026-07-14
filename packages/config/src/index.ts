@@ -83,7 +83,7 @@ export const config = {
   server: {
     port: getNum(process.env.PORT, 3001),
     get baseUrl(): string {
-      return process.env.BASE_URL || `http://localhost:${this.port}`;
+      return process.env.NEXT_PUBLIC_API_URL || `http://localhost:${this.port}`;
     },
     enableSignup: getBool(process.env.ENABLE_SIGNUP, true),
     enableAuth: process.env.ENABLE_AUTH !== "false",
@@ -101,7 +101,9 @@ export const config = {
     },
   },
   public: {
-    apiUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
+    get apiUrl(): string {
+      return process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    },
     enableAuth: process.env.NEXT_PUBLIC_ENABLE_AUTH !== "false",
     enableSignup: process.env.NEXT_PUBLIC_ENABLE_SIGNUP === "true",
     enableApiKeys: process.env.NEXT_PUBLIC_ENABLE_API_KEYS === "true",
