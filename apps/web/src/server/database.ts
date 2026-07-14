@@ -25,6 +25,7 @@ export const pgPool = pgConfig.connectionString
       database: pgConfig.database,
       user: pgConfig.user,
       password: pgConfig.password,
+      ssl: pgConfig.host.includes("localhost") || pgConfig.host.includes("127.0.0.1") ? false : { rejectUnauthorized: false },
     });
 
 /**
