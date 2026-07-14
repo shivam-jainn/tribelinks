@@ -110,7 +110,7 @@ function StatCard({
 }) {
   return (
     <div className="glass rounded-2xl p-6 border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300 relative overflow-hidden group">
-      <div className={`absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r opacity-60 group-hover:opacity-100 transition-opacity ${colorClass || "from-violet-500 to-indigo-500"}`} />
+      <div className={`absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r opacity-60 group-hover:opacity-100 transition-opacity ${colorClass || "from-red-500 to-orange-500"}`} />
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">{label}</span>
         <Icon className="w-4 h-4 text-white/20 group-hover:text-white/40 transition-colors" />
@@ -397,7 +397,7 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
               Analytics Dashboard
-              {refreshing && <RotateCw className="w-4 h-4 text-violet-400 animate-spin" />}
+              {refreshing && <RotateCw className="w-4 h-4 text-red-500 animate-spin" />}
             </h1>
             <p className="text-xs text-zinc-500 mt-0.5 font-medium">
               {new Date().toLocaleDateString("en", { weekday: "long", month: "long", day: "numeric" })}
@@ -412,7 +412,7 @@ export default function DashboardPage() {
                 onClick={() => setTimeframe(t)}
                 className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all capitalize ${
                   timeframe === t
-                    ? "bg-violet-600 text-white shadow"
+                    ? "bg-red-600 text-white shadow"
                     : "text-zinc-400 hover:text-white hover:bg-white/[0.02]"
                 }`}
               >
@@ -443,7 +443,7 @@ export default function DashboardPage() {
         {lastActionResult && (
           <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-zinc-900/80 backdrop-blur-md p-5 mt-4 transition-all animate-in fade-in slide-in-from-top-2 duration-300">
             {/* Left accent bar */}
-            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-violet-500 to-indigo-500" />
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-red-500 to-orange-500" />
             
             <div className="flex items-start justify-between gap-4 pl-2">
               <div className="flex-1 min-w-0">
@@ -461,7 +461,7 @@ export default function DashboardPage() {
                           href={lastActionResult.data.shortUrl} 
                           target="_blank" 
                           rel="noreferrer" 
-                          className="text-sm font-bold text-violet-400 hover:text-violet-300 transition-colors break-all flex items-center gap-1.5"
+                          className="text-sm font-bold text-red-400 hover:text-red-300 transition-colors break-all flex items-center gap-1.5"
                         >
                           {lastActionResult.data.shortUrl}
                           <ExternalLink className="w-3.5 h-3.5 inline-block shrink-0" />
@@ -549,7 +549,7 @@ export default function DashboardPage() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-2">
-                        <span className="flex h-2 w-2 rounded-full bg-violet-500 animate-pulse" />
+                        <span className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                         <h3 className="text-sm font-bold text-white tracking-wide">
                           Bulk Tracking Links Generated ({lastActionResult.data.created})
                         </h3>
@@ -559,7 +559,7 @@ export default function DashboardPage() {
                           const allLinks = lastActionResult.data.links.map((l: any) => `${l.name}: ${l.shortUrl}`).join("\n");
                           copyToClipboard(allLinks);
                         }}
-                        className="text-xs bg-violet-600/10 hover:bg-violet-600/20 text-violet-300 border border-violet-500/20 px-2.5 py-1.5 rounded-lg transition-all active:scale-95 font-semibold shrink-0"
+                        className="text-xs bg-red-600/10 hover:bg-red-600/20 text-red-300 border border-red-500/20 px-2.5 py-1.5 rounded-lg transition-all active:scale-95 font-semibold shrink-0"
                       >
                         Copy All Links
                       </button>
@@ -570,7 +570,7 @@ export default function DashboardPage() {
                           <div className="min-w-0 flex-1">
                             <span className="font-bold text-zinc-300">{link.name}</span>
                             {link.email && <span className="text-zinc-500 font-medium ml-1.5">({link.email})</span>}
-                            <div className="text-[10px] text-violet-400 font-medium truncate mt-0.5">{link.shortUrl}</div>
+                            <div className="text-[10px] text-red-400 font-medium truncate mt-0.5">{link.shortUrl}</div>
                           </div>
                           <button
                             onClick={() => copyToClipboard(link.shortUrl)}
@@ -606,8 +606,8 @@ export default function DashboardPage() {
         
         {/* Active Filters Info Pill */}
         {(analyticsFilter.targetId || analyticsFilter.type) && (
-          <div className="flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 px-4 py-2.5 rounded-xl text-xs text-violet-300">
-            <Info className="w-4 h-4 shrink-0 text-violet-400" />
+          <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-2.5 rounded-xl text-xs text-red-300">
+            <Info className="w-4 h-4 shrink-0 text-red-400" />
             <span>
               Active Filters:{" "}
               {analyticsFilter.targetId && (
@@ -641,7 +641,7 @@ export default function DashboardPage() {
             value={loading ? "—" : analytics?.totalEvents ?? 0}
             icon={MousePointerClick}
             sub="Across all tracked keys"
-            colorClass="from-violet-500 to-fuchsia-500"
+            colorClass="from-red-500 to-rose-500"
           />
           <StatCard
             label="Unique Visitors"
@@ -668,7 +668,7 @@ export default function DashboardPage() {
                 <h3 className="text-sm font-bold text-white tracking-wide">Activity Timeline</h3>
                 <p className="text-[11px] text-zinc-500 mt-0.5">Click frequency in select timeframe</p>
               </div>
-              <Badge variant="outline" className="text-xs bg-white/5 text-violet-300 border-violet-500/20 font-semibold px-2.5 py-0.5">
+              <Badge variant="outline" className="text-xs bg-white/5 text-red-300 border-red-500/20 font-semibold px-2.5 py-0.5">
                 {timeframe === "all" ? "All Time" : timeframe}
               </Badge>
             </div>
@@ -678,9 +678,9 @@ export default function DashboardPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={timelineData}>
                     <defs>
-                      <linearGradient id="glowPurple" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.35}/>
-                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.01}/>
+                      <linearGradient id="glowRed" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.35}/>
+                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0.01}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
@@ -696,15 +696,15 @@ export default function DashboardPage() {
                       tickLine={false}
                       allowDecimals={false}
                     />
-                    <Tooltip content={<ChartTooltip />} cursor={{ stroke: "rgba(139, 92, 246, 0.2)", strokeWidth: 1.5 }} />
+                    <Tooltip content={<ChartTooltip />} cursor={{ stroke: "rgba(239, 68, 68, 0.2)", strokeWidth: 1.5 }} />
                     <Area
                       type="monotone"
                       dataKey="events"
                       name="Events"
-                      stroke="#8b5cf6"
+                      stroke="#ef4444"
                       strokeWidth={2.5}
                       fillOpacity={1}
-                      fill="url(#glowPurple)"
+                      fill="url(#glowRed)"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -787,7 +787,7 @@ export default function DashboardPage() {
                       <div
                         className={`h-full rounded-full bg-gradient-to-r ${
                           idx === 0
-                            ? "from-violet-500 to-indigo-500"
+                            ? "from-red-500 to-orange-500"
                             : idx === 1
                             ? "from-cyan-500 to-blue-500"
                             : "from-zinc-500 to-zinc-400"
@@ -901,7 +901,7 @@ export default function DashboardPage() {
                   <div key={event.id} className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-white/[0.01] transition-colors">
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${
-                        isRedirect ? "bg-violet-500/10 border-violet-500/20 text-violet-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-400"
+                        isRedirect ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-400"
                       }`}>
                         {isRedirect ? <ArrowUpRight className="w-4 h-4" /> : <Zap className="w-4 h-4" />}
                       </div>
@@ -959,8 +959,8 @@ export default function DashboardPage() {
             ) : (
               links.slice(0, 5).map((link) => (
                 <div key={link.key} className="px-6 py-4 flex items-center gap-4 hover:bg-white/[0.02] transition-colors">
-                  <div className="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/25 flex items-center justify-center shrink-0">
-                    <Link2 className="w-3.5 h-3.5 text-violet-400" />
+                  <div className="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/25 flex items-center justify-center shrink-0">
+                    <Link2 className="w-3.5 h-3.5 text-red-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-bold text-zinc-200">/{link.key}</div>

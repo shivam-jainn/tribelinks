@@ -297,6 +297,30 @@ export class PostgresAnalyticsStore implements AnalyticsStore {
     ]);
   }
 
+  async saveEventsBatch(events: TrackedEvent[]): Promise<void> {
+    if (events.length === 0) return;
+    const valueStrings: string[] = [];
+    const values: any[] = [];
+    let count = 1;
+
+    for (const event of events) {
+      valueStrings.push(`($${count}, $${count+1}, $${count+2}, $${count+3}, $${count+4}, $${count+5}, $${count+6}, $${count+7}, $${count+8}, $${count+9}, $${count+10}, $${count+11}, $${count+12})`);
+      values.push(
+        event.id, event.type, event.name, event.targetId, event.sessionId,
+        event.timestamp, event.duration, event.url, event.referrer, event.userAgent,
+        event.ip, event.version, JSON.stringify(event.metadata)
+      );
+      count += 13;
+    }
+
+    await this.pool.query(`
+      INSERT INTO ${this.tableName} (
+        id, type, name, target_id, session_id, timestamp, duration, url, referrer, user_agent, ip, version, metadata
+      ) VALUES ${valueStrings.join(", ")}
+      ON CONFLICT (id) DO NOTHING
+    `, values);
+  }
+
   async getAnalytics(filter: AnalyticsFilter): Promise<AnalyticsReport> {
     const conditions: string[] = [];
     const params: any[] = [];

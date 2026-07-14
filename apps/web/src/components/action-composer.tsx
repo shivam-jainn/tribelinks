@@ -48,7 +48,7 @@ export interface ActionComposerProps {
 
 const DEFAULT_PILL_COLORS = [
   { base: "bg-cyan-500/10 text-cyan-300 border-cyan-400/20", focus: "ring-cyan-500/30" },
-  { base: "bg-violet-500/10 text-violet-300 border-violet-400/20", focus: "ring-violet-500/30" },
+  { base: "bg-red-500/10 text-red-300 border-red-400/20", focus: "ring-red-500/30" },
   { base: "bg-emerald-500/10 text-emerald-300 border-emerald-400/20", focus: "ring-emerald-500/30" },
   { base: "bg-rose-500/10 text-rose-300 border-rose-400/20", focus: "ring-rose-500/30" },
   { base: "bg-orange-500/10 text-orange-300 border-orange-400/20", focus: "ring-orange-500/30" },
@@ -307,7 +307,7 @@ function SelectPill({ pill, value, onChange, colorBase, colorFocus, tabIndex }: 
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                    className="text-xs text-violet-400"
+                    className="text-xs text-red-400"
                   >
                     ✓
                   </motion.span>
@@ -469,7 +469,7 @@ export function ActionComposer({
                   width: 80,
                   height: 80,
                   borderRadius: "50%",
-                  background: "radial-gradient(circle, rgba(139,92,246,0.3) 0%, rgba(6,182,212,0.1) 70%)",
+                  background: "radial-gradient(circle, rgba(239,68,68,0.3) 0%, rgba(249,115,22,0.1) 70%)",
                   zIndex: 40,
                   pointerEvents: "none",
                 }}
@@ -488,7 +488,7 @@ export function ActionComposer({
               >
                 {/* Visual Icon indicator */}
                 <div className="hidden md:flex items-center justify-center pl-2 text-zinc-500">
-                  <Terminal className="w-4 h-4 text-violet-400/80" />
+                  <Terminal className="w-4 h-4 text-red-400/80" />
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -558,7 +558,7 @@ export function ActionComposer({
                                 <span className="text-[10px] text-zinc-500 mt-0.5 truncate max-w-xs">{item.sentence}</span>
                               </div>
                               {selectedMenuIndex === index && (
-                                <motion.span layoutId="menu-indicator" className="text-xs text-violet-400 font-mono pr-1">
+                                <motion.span layoutId="menu-indicator" className="text-xs text-red-400 font-mono pr-1">
                                   ↵ Enter
                                 </motion.span>
                               )}
@@ -581,7 +581,7 @@ export function ActionComposer({
               >
                 {/* Active Action Header */}
                 <div className="flex items-center justify-between px-6 py-3 border-b border-white/[0.04] bg-white/[0.01]">
-                  <span className="text-[10px] text-violet-400 uppercase tracking-widest font-bold">
+                  <span className="text-[10px] text-red-400 uppercase tracking-widest font-bold">
                     Active Action: {action.label}
                   </span>
                   <button
@@ -651,7 +651,7 @@ export function ActionComposer({
                     className={cn(
                       "relative h-[34px] min-w-[36px] px-4 text-xs font-semibold overflow-hidden flex items-center justify-center outline-none transition-colors duration-150",
                       allFilled
-                        ? "bg-violet-600 hover:bg-violet-500 text-white shadow-lg cursor-pointer"
+                        ? "bg-red-600 hover:bg-red-500 text-white shadow-lg cursor-pointer"
                         : "bg-white/5 text-white/20 border border-white/[0.06] cursor-not-allowed",
                     )}
                   >

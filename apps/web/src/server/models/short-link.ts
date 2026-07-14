@@ -1,4 +1,8 @@
 import { pgPool } from "../database";
+import { redis } from "../redis";
+
+const CACHE_TTL_SECONDS = 300; // 5 minutes
+const cacheKey = (key: string) => `short-link:${key}`;
 
 export interface ShortLink {
   key: string;
@@ -15,11 +19,32 @@ export interface ShortLink {
  * Look up a short link by key. Returns null if not found.
  */
 export async function getShortLink(key: string): Promise<ShortLink | null> {
+  if (redis) {
+    try {
+      const cached = await redis.get(cacheKey(key));
+      if (cached) {
+        return JSON.parse(cached) as ShortLink;
+      }
+    } catch (err) {
+      console.error("[Redis] Cache read error:", err);
+    }
+  }
+
   const result = await pgPool.query<ShortLink>(
     `SELECT * FROM short_links WHERE key = $1`,
     [key]
   );
-  return result.rows[0] ?? null;
+  const link = result.rows[0] ?? null;
+
+  if (link && redis) {
+    try {
+      await redis.setex(cacheKey(key), CACHE_TTL_SECONDS, JSON.stringify(link));
+    } catch (err) {
+      console.error("[Redis] Cache write error:", err);
+    }
+  }
+
+  return link;
 }
 
 /**
@@ -63,7 +88,15 @@ export async function deleteShortLink(
     `DELETE FROM short_links WHERE key = $1 AND user_id = $2`,
     [key, userId]
   );
-  return (result.rowCount ?? 0) > 0;
+  const deleted = (result.rowCount ?? 0) > 0;
+  if (deleted && redis) {
+    try {
+      await redis.del(cacheKey(key));
+    } catch (err) {
+      console.error("[Redis] Cache delete error:", err);
+    }
+  }
+  return deleted;
 }
 
 /**
@@ -85,5 +118,13 @@ export async function updateShortLink(
      RETURNING *`,
     [updates.url ?? null, updates.contactId ?? null, updates.campaignId ?? null, updates.rules ? JSON.stringify(updates.rules) : null, updates.type ?? null, key, userId]
   );
-  return result.rows[0] ?? null;
+  const link = result.rows[0] ?? null;
+  if (link && redis) {
+    try {
+      await redis.del(cacheKey(key));
+    } catch (err) {
+      console.error("[Redis] Cache update invalidation error:", err);
+    }
+  }
+  return link;
 }

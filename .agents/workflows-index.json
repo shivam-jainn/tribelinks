@@ -1,0 +1,92 @@
+[
+  {
+    "title": "Agent Guidelines & Rules",
+    "path": ".agents/AGENTS.md",
+    "content": "# agent guidelines & rules\n\n## mandatory workflow discovery\nbefore starting any planning or coding task, you must search for existing guidelines and reusable workflows:\n1. run the discovery cli tool with relevant keywords matching your task:\n   ```bash\n   node scripts/discover-workflows.js <keyword>\n   ```\n2. review the matched workflow files and read them to reuse existing scripts, commands, and patterns.\n3. if no matching workflow is found, consult the standard phase-specific routers:\n\n- **planning**: [agent-plan.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/plan/agent-plan.md)\n- **implementation**: [agent-impl.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/impl/agent-impl.md)\n- **verification**: [agent-verify.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/verify/agent-verify.md)\n- **debugging**: [agent-debug.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/debug/agent-debug.md)\n"
+  },
+  {
+    "title": "Debugging Phase",
+    "path": ".agents/debug/agent-debug.md",
+    "content": "# debugging phase\n\nrefer to diagnostic workflows:\n- logging: [logging-wf.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/debug/logging-wf.md)\n- profiling: [profiling-wf.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/debug/profiling-wf.md)\n- diagnostics: [diagnostics-wf.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/debug/diagnostics-wf.md)\n"
+  },
+  {
+    "title": "Diagnostics Workflow (`diagnostics-wf`)",
+    "path": ".agents/debug/diagnostics-wf.md",
+    "content": "# diagnostics workflow (`diagnostics-wf`)\n\n## execution\nrun system status checks or check database connection parameters to diagnose issues.\n"
+  },
+  {
+    "title": "Logging Workflow (`logging-wf`)",
+    "path": ".agents/debug/logging-wf.md",
+    "content": "# logging workflow (`logging-wf`)\n\n## execution\nuse target-specific debug environment variables or print debug logs where needed.\ncheck console outputs in both dev server environments:\n- web app: `npm run dev` output.\n"
+  },
+  {
+    "title": "Profiling Workflow (`profiling-wf`)",
+    "path": ".agents/debug/profiling-wf.md",
+    "content": "# profiling workflow (`profiling-wf`)\n\n## execution\nprofile script runtimes and api endpoints using built-in node.js profilers or console timers.\n"
+  },
+  {
+    "title": "Implementation Phase",
+    "path": ".agents/impl/agent-impl.md",
+    "content": "# implementation phase\n\nwhen implementing code changes, refer to the following semantic files:\n\n1. **coding standards & best practices**:\n   - refer to: [coding.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/impl/coding.md)\n\n2. **parallel task execution**:\n   - refer to: [commands-wf.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/workflows/commands-wf.md)\n\n3. **automation & scripting**:\n   - refer to: [automation.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/impl/automation.md)\n"
+  },
+  {
+    "title": "Automation Guidelines",
+    "path": ".agents/impl/automation.md",
+    "content": "# automation guidelines\n\n- automate repetitive development tasks using npm scripts or custom scripts inside the `scripts/` directory.\n- document any new automation workflow under `.agents/*-wf.md`.\n"
+  },
+  {
+    "title": "Coding Guidelines",
+    "path": ".agents/impl/coding.md",
+    "content": "# coding guidelines\n\n- maintain documentation integrity.\n- preserve existing comments and docstrings.\n- ensure type correctness and lint verification.\n- group updates by component layer (monorepo packages vs apps).\n"
+  },
+  {
+    "title": "Planning Phase",
+    "path": ".agents/plan/agent-plan.md",
+    "content": "# planning phase\n\nwhen planning, refer to the following specific guidelines and workflows:\n\n1. **understand repository layout**:\n   - run the layout mapping workflow: [tree-package-wf.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/workflows/tree-package-wf.md)\n\n2. **produce implementation plan**:\n   - follow formatting rules: [plan-format.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/plan/plan-format.md)\n\n3. **split work into independently verifiable microtasks**:\n   - follow precision and microtask rules: [microtasks.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/plan/microtasks.md)\n\n4. **workflow discovery**:\n   - reusing and discovering workflows: [discovery.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/plan/discovery.md)\n   - cli search tool: [discovery-wf.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/workflows/discovery-wf.md)\n"
+  },
+  {
+    "title": "Workflow Discovery & Decomposition",
+    "path": ".agents/plan/discovery.md",
+    "content": "# workflow discovery & decomposition\n\n## identifying reusable workflows\nduring the planning phase:\n1. determine if a reusable workflow already exists in `.agents/*-wf.md`.\n2. if not, evaluate if the sequence of commands can be automated via:\n   - an npm script\n   - a makefile target or taskfile/justfile task\n   - a standalone shell script\n\n## post-execution creation\nat the end of any task execution/verification:\n1. review the commands and processes performed.\n2. if it makes sense to do so (e.g. if the steps are repeatable or could benefit future tasks), create a new `*-wf.md` file in `.agents/`.\n3. decompose workflows into smaller, modular sub-workflows if they contain independent, reusable parts.\n4. reference these workflows in future plans to avoid repeating instructions and save tokens.\n"
+  },
+  {
+    "title": "Microtask Guidelines",
+    "path": ".agents/plan/microtasks.md",
+    "content": "# microtask guidelines\n\nwhen drafting the implementation plan:\n- be extremely deliberate.\n- pinpoint with high accuracy what should change in the codebase, detailing exact lines, symbols, or functions.\n- avoid high-level or generic summaries.\n- list changes as specified microtasks.\n"
+  },
+  {
+    "title": "Implementation Plan Formatting Guidelines",
+    "path": ".agents/plan/plan-format.md",
+    "content": "# implementation plan formatting guidelines\n\n## target path\n- save the plan to: `<appdatadir>/brain/<conversation-id>/implementation_plan.md`\n\n## structure\nthe document must follow the standard planning template:\n1. **goal description**: brief description of what the change accomplishes.\n2. **user review required**: highlight breaking changes, critical design decisions, and warnings.\n3. **open questions**: clarifying or design questions.\n4. **proposed changes**: grouped by component/package, specifying exact files to modify, create, or delete with links.\n5. **verification plan**: automated tests and manual steps.\n"
+  },
+  {
+    "title": "Verification Phase",
+    "path": ".agents/verify/agent-verify.md",
+    "content": "# verification phase\n\nwhen verifying your changes:\n\n1. **run automated tests**:\n   - refer to: [verify-wf.md](file:///users/shivamjain/documents/antigravity/tribelinks/.agents/verify/verify-wf.md)\n"
+  },
+  {
+    "title": "Verification Workflow (`verify-wf`)",
+    "path": ".agents/verify/verify-wf.md",
+    "content": "# verification workflow (`verify-wf`)\n\n## execution\nrun the tests at the very end of any task implementation/verification using:\n\n```bash\nnpm run test\n```\n\n## expected output\n- all workspace tests should complete successfully with code 0.\n"
+  },
+  {
+    "title": "Reusable Commands & Execution Guidelines",
+    "path": ".agents/workflows/commands-wf.md",
+    "content": "# reusable commands & execution guidelines\n\n## parallel task execution\nrun tasks, builds, or commands in parallel where appropriate to save time and optimize execution.\nfor example, to run tasks in the background or simultaneously in shells:\n```bash\n# example parallel command execution in zsh\ncommand1 & command2 & wait\n```\nor run dev servers/parallel watchers as specified in workspace workflows.\n"
+  },
+  {
+    "title": "Workflow Discovery & Search Workflow (`discovery-wf`)",
+    "path": ".agents/workflows/discovery-wf.md",
+    "content": "# workflow discovery & search workflow (`discovery-wf`)\n\n## purpose\nthis workflow enables fast search and semantic matching of workflows in the workspace, reducing token usage by loading only matching files.\n\n## execution\n\n### 1. build or update search index\nrun this command to crawl `.agents/` and update the local json search index:\n```bash\nnode scripts/discover-workflows.js --index\n```\n\n### 2. search for guidelines or workflows\nrun this command to search for workflows matching a specific keyword (e.g. `verify`, `plan`, `coding`):\n```bash\nnode scripts/discover-workflows.js verify\n```\n\n## expected output\na lists of matched documents, including titles, markdown paths, and file schemes for immediate reading.\n"
+  },
+  {
+    "title": "Documentation Refactor Workflow (`refactor-docs-wf`)",
+    "path": ".agents/workflows/refactor-docs-wf.md",
+    "content": "# documentation refactor workflow (`refactor-docs-wf`)\n\n## purpose\nthis workflow automates the reorganization of the agent guidelines and workflows into a clean subfolder hierarchy.\n\n## execution\nrun the shell script to move and rename files to the correct subdirectories:\n\n```bash\nbash scripts/refactor-docs.sh\n```\n\n## expected output\nall guidelines and `*-wf.md` files are moved into their respective folders (`plan/`, `impl/`, `verify/`, `debug/`, `workflows/`).\n"
+  },
+  {
+    "title": "Repository Structure Discovery Workflow (`tree-package-wf`)",
+    "path": ".agents/workflows/tree-package-wf.md",
+    "content": "# repository structure discovery workflow (`tree-package-wf`)\n\n## execution\nrun the following commands to get a high-level view of the repository layout:\n\n```bash\ntree -l 3 -i 'node_modules|.git|dist|.next'\nfind . -maxdepth 3 -name package.json\n```\n\n## expected output\n- high-level directory tree of packages and applications.\n- list of package.json files identifying workspace boundaries.\n\n## information to collect\n- monorepo package structure.\n- build system/workspace orchestrator configuration.\n\n## consumption\n- used during the planning phase to identify correct directories for code changes and dependencies.\n"
+  }
+]

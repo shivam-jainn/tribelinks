@@ -34,6 +34,9 @@ async function getAuthenticatedUser(req: NextRequest): Promise<User | null> {
   await ensureInit();
 
   if (!ENABLE_AUTH) {
+    const sessionCookie = req.cookies.get("bypass-auth-session")?.value;
+    if (!sessionCookie) return null;
+
     try {
       const result = await pgPool.query<User>("SELECT id, name, email, created_at FROM users LIMIT 1");
       if (result.rows.length > 0) {
@@ -43,7 +46,7 @@ async function getAuthenticatedUser(req: NextRequest): Promise<User | null> {
     return {
       id: "00000000-0000-0000-0000-000000000000",
       name: "Default User",
-      email: "admin@example.com",
+      email: process.env.AUTH_EMAIL || "admin@example.com",
       created_at: new Date(),
     };
   }
@@ -127,6 +130,22 @@ async function handleInternal(
       if (!body.email?.trim() || !body.password?.trim()) {
         return NextResponse.json({ error: "Missing email or password" }, { status: 400 });
       }
+      if (!ENABLE_AUTH) {
+        const bypassEmail = process.env.AUTH_EMAIL || "admin@example.com";
+        const bypassPassword = process.env.AUTH_PASSWORD || process.env.AUTH_USERNAME || "admin";
+        if (body.email.trim().toLowerCase() === bypassEmail.toLowerCase() && body.password === bypassPassword) {
+          const response = NextResponse.json({ success: true });
+          response.cookies.set("bypass-auth-session", "bypass_token_123", {
+            path: "/",
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 60 * 60 * 24 * 7, // 1 week
+          });
+          return response;
+        } else {
+          return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+        }
+      }
       const user = await authenticateUser(body.email.trim(), body.password);
       if (!user) {
         return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
@@ -137,6 +156,11 @@ async function handleInternal(
 
     // ─── POST /api/logout ─────────────────────────────────────────────────────────
     if (path.length === 1 && path[0] === "logout" && method === "POST") {
+      if (!ENABLE_AUTH) {
+        const response = NextResponse.json({ success: true });
+        response.cookies.delete("bypass-auth-session");
+        return response;
+      }
       const authHeader = req.headers.get("authorization") || "";
       const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
       if (token && token.startsWith("sess_")) {
