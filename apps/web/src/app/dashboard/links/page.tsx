@@ -86,13 +86,13 @@ export default function LinksPage() {
               onChange={(e) => setNewUrl(e.target.value)}
               placeholder="https://..."
               required
-              className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/8 text-white placeholder-white/20 text-sm focus:outline-none focus:border-violet-500/50 transition-all"
+              className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/8 text-white placeholder-white/20 text-sm focus:outline-none focus:border-red-500/50 transition-all"
             />
             <input
               value={newKey}
               onChange={(e) => setNewKey(e.target.value)}
               placeholder="custom-key (optional)"
-              className="w-44 px-4 py-2.5 rounded-xl bg-white/5 border border-white/8 text-white placeholder-white/20 text-sm focus:outline-none focus:border-violet-500/50 transition-all"
+              className="w-44 px-4 py-2.5 rounded-xl bg-white/5 border border-white/8 text-white placeholder-white/20 text-sm focus:outline-none focus:border-red-500/50 transition-all"
             />
             <button
               type="submit"
@@ -113,7 +113,7 @@ export default function LinksPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search links…"
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/4 border border-white/6 text-white placeholder-white/20 text-sm focus:outline-none focus:border-violet-500/40 transition-all"
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/4 border border-white/6 text-white placeholder-white/20 text-sm focus:outline-none focus:border-red-500/40 transition-all"
           />
         </div>
 
@@ -143,7 +143,7 @@ export default function LinksPage() {
                   <div className="col-span-2">
                     <Badge
                       variant="outline"
-                      className="text-violet-300 border-violet-400/20 bg-violet-500/5 font-mono text-xs"
+                      className="text-red-300 border-red-400/20 bg-red-500/5 font-mono text-xs"
                     >
                       /{link.key}
                     </Badge>

@@ -7,6 +7,17 @@ export function middleware(request: NextRequest) {
   const enableAuth = trackerConfig.public.enableAuth;
 
   if (!enableAuth) {
+    const session = request.cookies.get("bypass-auth-session");
+    if (pathname.startsWith("/dashboard")) {
+      if (!session?.value) {
+        return NextResponse.redirect(new URL("/auth/login", request.url));
+      }
+    }
+    if (pathname.startsWith("/auth")) {
+      if (session?.value) {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
+    }
     return NextResponse.next();
   }
 

@@ -119,7 +119,7 @@ export default function SettingsPage() {
               <h2 className="text-sm font-semibold text-white">API Keys</h2>
               <p className="text-xs text-white/40 mt-1">
                 Use these keys to authenticate SDK calls, server-side integrations, and the{" "}
-                <code className="text-violet-300 font-mono">Authorization: Bearer &lt;key&gt;</code> header.
+                <code className="text-red-300 font-mono">Authorization: Bearer &lt;key&gt;</code> header.
                 Each key can be independently labelled and revoked.
               </p>
             </div>
@@ -131,7 +131,7 @@ export default function SettingsPage() {
                   value={newLabel}
                   onChange={(e) => setNewLabel(e.target.value)}
                   placeholder="Label — e.g. Production SDK, CI/CD"
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/8 text-white placeholder-white/20 text-sm focus:outline-none focus:border-violet-500/50 transition-all"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/8 text-white placeholder-white/20 text-sm focus:outline-none focus:border-red-500/50 transition-all"
                   disabled={!isEnabled}
                 />
                 <button
@@ -197,7 +197,7 @@ export default function SettingsPage() {
           </div>
           {!isEnabled && (
             <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/10 rounded-2xl">
-              <span className="px-4 py-2 rounded-full bg-violet-500/20 border border-violet-500/30 text-xs font-semibold text-violet-300 uppercase tracking-widest animate-pulse shadow-lg shadow-violet-500/5">
+              <span className="px-4 py-2 rounded-full bg-red-500/20 border border-red-500/30 text-xs font-semibold text-red-300 uppercase tracking-widest animate-pulse shadow-lg shadow-red-500/5">
                 Coming Soon
               </span>
               <p className="text-white/40 text-xs mt-2 font-medium">API Keys & External Integrations feature is coming soon</p>
@@ -230,7 +230,7 @@ sdk.track({ type: 'pageview', targetId: 'my-campaign' });`}</pre>
               </div>
               <div className="space-y-1.5">
                 <p className="text-xs text-white/30 uppercase tracking-wider">Direct API call</p>
-                <pre className="px-4 py-3 rounded-xl bg-black/40 border border-white/6 text-violet-300 text-xs font-mono overflow-x-auto whitespace-pre">{`curl -X POST ${config.public.apiUrl}/api/event \\
+                <pre className="px-4 py-3 rounded-xl bg-black/40 border border-white/6 text-red-300 text-xs font-mono overflow-x-auto whitespace-pre">{`curl -X POST ${config.public.apiUrl}/api/event \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{ "type": "click", "targetId": "hero-cta" }'`}</pre>

@@ -58,6 +58,8 @@ const getBool = (val: string | undefined, def: boolean): boolean => {
   return val.toLowerCase() === "true";
 };
 
+const isProd = process.env.ENV === "prod" || process.env.NODE_ENV === "production";
+
 export const config = {
   analytics: {
     db: process.env.ANALYTICS_DB || "clickhouse",
@@ -91,8 +93,8 @@ export const config = {
     get baseUrl(): string {
       return process.env.NEXT_PUBLIC_API_URL || `http://localhost:${this.port}`;
     },
-    enableSignup: getBool(process.env.ENABLE_SIGNUP, true),
-    enableAuth: process.env.ENABLE_AUTH !== "false",
+    enableSignup: isProd ? true : getBool(process.env.ENABLE_SIGNUP, true),
+    enableAuth: isProd ? true : process.env.ENABLE_AUTH !== "false",
   },
   auth: {
     secret: process.env.BETTER_AUTH_SECRET || "development-secret-key-1234567890-must-be-changed-in-production",
@@ -110,8 +112,8 @@ export const config = {
     get apiUrl(): string {
       return process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
     },
-    enableAuth: process.env.NEXT_PUBLIC_ENABLE_AUTH !== "false",
-    enableSignup: process.env.NEXT_PUBLIC_ENABLE_SIGNUP === "true",
+    enableAuth: isProd ? true : process.env.NEXT_PUBLIC_ENABLE_AUTH !== "false",
+    enableSignup: isProd ? true : (process.env.NEXT_PUBLIC_ENABLE_SIGNUP !== "false" && getBool(process.env.ENABLE_SIGNUP, true)),
     enableApiKeys: process.env.NEXT_PUBLIC_ENABLE_API_KEYS === "true",
     enableReferralEngine: process.env.NEXT_PUBLIC_ENABLE_REFERRAL_ENGINE === "true",
     enableOneTimeLinks: process.env.NEXT_PUBLIC_ENABLE_ONE_TIME_LINKS === "true",

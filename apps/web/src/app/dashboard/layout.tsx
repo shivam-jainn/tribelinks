@@ -41,16 +41,18 @@ export default function DashboardLayout({
         setUser(u);
       } catch (err) {
         console.error("Failed to load user profile", err);
-        if (enableAuth) {
-          router.push("/auth/login");
-        }
+        router.push("/auth/login");
       }
     }
     load();
   }, []);
 
   async function handleLogout() {
-    await authClient.signOut();
+    if (!enableAuth) {
+      await fetch("/api/logout", { method: "POST" });
+    } else {
+      await authClient.signOut();
+    }
     router.push("/auth/login");
     router.refresh();
   }
@@ -92,8 +94,8 @@ export default function DashboardLayout({
 
         {/* Profile Card / Signout */}
         <div className="mt-auto px-4 pt-4 border-t border-white/[0.06] flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-violet-600/30 border border-violet-500/30 flex items-center justify-center shrink-0">
-            <span className="text-sm font-semibold text-violet-300 uppercase">
+          <div className="w-9 h-9 rounded-full bg-red-950/40 border border-red-900/30 flex items-center justify-center shrink-0">
+            <span className="text-sm font-semibold text-red-400 uppercase">
               {user?.name ? user.name.slice(0, 2) : "U"}
             </span>
           </div>
@@ -105,15 +107,13 @@ export default function DashboardLayout({
               {user?.email || "tribelinks user"}
             </p>
           </div>
-          {enableAuth && (
-            <button
-              onClick={handleLogout}
-              className="p-2 rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 transition-all shrink-0"
-              title="Sign out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          )}
+          <button
+            onClick={handleLogout}
+            className="p-2 rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 transition-all shrink-0 cursor-pointer"
+            title="Sign out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </aside>
 
