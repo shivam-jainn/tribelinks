@@ -7,7 +7,7 @@
     "build": "npm run build --prefix ../.. --workspace=@tracker/config --workspace=@tracker/core --workspace=@tracker/queue && next build",
     "start": "next start",
     "lint": "eslint",
-    "db:migrate": "ts-node ../../scripts/db-setup.ts"
+    "db:migrate": "tsx ../../scripts/db-setup.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
