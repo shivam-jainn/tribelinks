@@ -1,19 +1,19 @@
 export interface QueueAdapter<T> {
   enqueue(job: T): Promise<void>;
-  process(handler: (job: T) => Promise<void>): void;
+  process(handler: (job: T, ack?: () => void) => Promise<void>): void;
 }
 
 export class InMemoryQueueAdapter<T> implements QueueAdapter<T> {
   private queue: T[] = [];
   private processing = false;
-  private handler?: (job: T) => Promise<void>;
+  private handler?: (job: T, ack?: () => void) => Promise<void>;
 
   async enqueue(job: T): Promise<void> {
     this.queue.push(job);
     this.triggerProcessing();
   }
 
-  process(handler: (job: T) => Promise<void>): void {
+  process(handler: (job: T, ack?: () => void) => Promise<void>): void {
     this.handler = handler;
     this.triggerProcessing();
   }
@@ -29,7 +29,7 @@ export class InMemoryQueueAdapter<T> implements QueueAdapter<T> {
         const job = this.queue.shift();
         if (job) {
           try {
-            await this.handler(job);
+            await this.handler(job, () => {});
           } catch (error) {
             console.error("Queue worker error processing job:", error);
           }

@@ -4,6 +4,7 @@ import { TrackedEvent, AnalyticsFilter, AnalyticsReport } from "./types";
 export interface AnalyticsStore {
   initialize(): Promise<void>;
   saveEvent(event: TrackedEvent): Promise<void>;
+  saveEventsBatch(events: TrackedEvent[]): Promise<void>;
   getAnalytics(filter: AnalyticsFilter): Promise<AnalyticsReport>;
 }
 
@@ -17,6 +18,10 @@ export class InMemoryAnalyticsStore implements AnalyticsStore {
 
   async saveEvent(event: TrackedEvent): Promise<void> {
     this.events.push(event);
+  }
+
+  async saveEventsBatch(events: TrackedEvent[]): Promise<void> {
+    this.events.push(...events);
   }
 
   async getAnalytics(filter: AnalyticsFilter): Promise<AnalyticsReport> {
@@ -129,6 +134,29 @@ export class ClickHouseAnalyticsStore implements AnalyticsStore {
         version: event.version,
         metadata: event.metadata
       }],
+      format: "JSONEachRow"
+    });
+  }
+
+  async saveEventsBatch(events: TrackedEvent[]): Promise<void> {
+    if (events.length === 0) return;
+    await this.client.insert({
+      table: this.tableName,
+      values: events.map(event => ({
+        id: event.id,
+        type: event.type,
+        name: event.name,
+        targetId: event.targetId,
+        sessionId: event.sessionId,
+        timestamp: event.timestamp instanceof Date ? event.timestamp.toISOString() : new Date(event.timestamp).toISOString(),
+        duration: event.duration,
+        url: event.url,
+        referrer: event.referrer,
+        userAgent: event.userAgent,
+        ip: event.ip,
+        version: event.version,
+        metadata: event.metadata
+      })),
       format: "JSONEachRow"
     });
   }

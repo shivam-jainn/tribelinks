@@ -62,6 +62,12 @@ export const config = {
   analytics: {
     db: process.env.ANALYTICS_DB || "clickhouse",
   },
+  redis: {
+    url: process.env.REDIS_URL || process.env.VALKEY_URL || null,
+  },
+  rabbitmq: {
+    url: process.env.RABBITMQ_URL || null,
+  },
   postgres: {
     connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
     host: process.env.POSTGRES_HOST || "localhost",
