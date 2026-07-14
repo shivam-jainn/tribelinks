@@ -31,32 +31,56 @@ function resolveAB(abRules: ABRule[]): string | null {
 function extractGeoMeta(ip: string, req: NextRequest): Record<string, string> {
   const get = (h: string) => req.headers.get(h) || "";
   
+  const country = get("cf-ipcountry") || get("x-vercel-ip-country");
+  const city = get("cf-ipcity") || get("x-vercel-ip-city");
+  const region = get("cf-ipregion") || get("x-vercel-ip-country-region");
+  const latitude = get("cf-iplatitude") || get("x-vercel-ip-latitude");
+  const longitude = get("cf-iplongitude") || get("x-vercel-ip-longitude");
+  const timezone = get("cf-timezone") || get("x-vercel-ip-timezone") || "UTC";
+
+  if (country) {
+    return {
+      country,
+      city: city || "Unknown",
+      region: region || "Unknown",
+      latitude: latitude || "",
+      longitude: longitude || "",
+      timezone,
+      forwardedFor: get("x-forwarded-for") || ip,
+    };
+  }
+
   let lookupIp = ip;
   if (ip.includes("::ffff:")) {
     lookupIp = ip.split("::ffff:")[1];
   }
   if (lookupIp === "127.0.0.1" || lookupIp === "::1") {
     return {
-      country: get("cf-ipcountry") || get("x-vercel-ip-country") || "LOCAL",
-      city: get("cf-ipcity") || get("x-vercel-ip-city") || "Localhost",
-      region: get("cf-ipregion") || get("x-vercel-ip-country-region") || "Localhost",
-      latitude: get("cf-iplatitude") || "",
-      longitude: get("cf-iplongitude") || "",
-      timezone: get("cf-timezone") || get("x-vercel-ip-timezone") || "UTC",
+      country: "LOCAL",
+      city: "Localhost",
+      region: "Localhost",
+      latitude: "",
+      longitude: "",
+      timezone,
       forwardedFor: get("x-forwarded-for") || ip,
     };
   }
 
-  const geoip = require("geoip-lite");
-  const lookup = geoip.lookup(lookupIp);
+  let lookup: any = null;
+  try {
+    const geoip = require("geoip-lite");
+    lookup = geoip.lookup(lookupIp);
+  } catch (err) {
+    console.error("GeoIP lookup failed:", err);
+  }
 
   return {
-    country: lookup?.country || get("cf-ipcountry") || get("x-vercel-ip-country") || "Unknown",
-    city: lookup?.city || get("cf-ipcity") || get("x-vercel-ip-city") || "Unknown",
-    region: lookup?.region || get("cf-ipregion") || get("x-vercel-ip-country-region") || "Unknown",
-    latitude: lookup?.ll?.[0] ? String(lookup.ll[0]) : get("cf-iplatitude") || "",
-    longitude: lookup?.ll?.[1] ? String(lookup.ll[1]) : get("cf-iplongitude") || "",
-    timezone: lookup?.timezone || get("cf-timezone") || get("x-vercel-ip-timezone") || "UTC",
+    country: lookup?.country || "Unknown",
+    city: lookup?.city || "Unknown",
+    region: lookup?.region || "Unknown",
+    latitude: lookup?.ll?.[0] ? String(lookup.ll[0]) : "",
+    longitude: lookup?.ll?.[1] ? String(lookup.ll[1]) : "",
+    timezone: lookup?.timezone || timezone,
     forwardedFor: get("x-forwarded-for") || ip,
   };
 }
